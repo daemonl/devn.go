@@ -61,13 +61,17 @@ An extension to the Dockerfile, also through comments, which is used to run scri
 Actually it knows nothing about docker, it's really just parsing comments, so could work on any file which has comments.
 
 Lines like
+
 ```
 #+GIT ssh://git@github.com/awesome/project
 ```
+
 will call
+
 ```
 docker-ext/GIT ssh://git@github.com/awesome/project
-``
+```
+
 (which could just be a symlink to git, but you probably want to whitelist things, or create bash scripts, or even use the devn parser above)
 
 # Notes
@@ -88,3 +92,6 @@ docker-ext/GIT  ssh://git@github.com/awesome/project
 It's not required, if the # is missing, it will still merge the lines, but that's probably not the behavior you are looking for
 
 
+### Security
+
+There is no attempt made for adding security, your PATH variable, running arbitrary commands etc, this is designed for somewhat trusted scripts.

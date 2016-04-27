@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -114,7 +113,7 @@ var flags = struct {
 }{}
 
 func init() {
-	flag.StringVar(&flags.script, "script", "", "The bash-ish script to run")
+	flag.StringVar(&flags.script, "script", "NONE", "The bash-ish script to run")
 	flag.StringVar(&flags.envs, "envs", "./environments", "The root of the environment scripts")
 }
 
@@ -137,6 +136,9 @@ func do() error {
 		}
 		flags.envs = path.Clean(path.Join(wd, flags.envs))
 	}
+
+	fmt.Println("Starting Devn build")
+	defer fmt.Println("Devn build ended")
 
 	workdir := path.Dir(flags.script)
 
@@ -186,6 +188,10 @@ func do() error {
 			continue
 		}
 		baseEnv = append(baseEnv, l)
+	}
+
+	if next == nil {
+		return nil
 	}
 
 	for {

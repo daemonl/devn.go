@@ -4,10 +4,14 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/daemonl/devn.go"
+	"github.com/mattn/go-shellwords"
 )
 
 var flags = struct {
@@ -28,6 +32,29 @@ func main() {
 		os.Exit(1)
 		return
 	}
+}
+
+func run(command, args string) error {
+	runScript := path.Clean(path.Join(flags.ext, command))
+	if !strings.HasPrefix(runScript, flags.ext) {
+		return fmt.Errorf("Script name %s not rooted at base", command)
+	}
+	argsArray, err := shellwords.Parse(args)
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(runScript, argsArray...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stdout, stdout)
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stderr, stderr)
+	return cmd.Run()
 }
 
 func do() error {
@@ -63,6 +90,10 @@ func do() error {
 				args = parts[1]
 			}
 			fmt.Printf("Run %s With %s\n", command, args)
+			err = run(command, args)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

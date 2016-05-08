@@ -1,4 +1,4 @@
-package devn
+package util
 
 //ScanEscapedLines is exactly like bufio.ScanLines, except lines ending in an
 //escape character (\) are joined, without the newline or escape, and having

@@ -18,7 +18,8 @@ docker-build: FORCE buildall
 	docker tag ${DOCKER_TAG}:${VERSION} ${DOCKER_TAG}:latest
 
 docker-push: FORCE docker-build
-	docker push ${DOCKER_TAG}:${VERSION} ${DOCKER_TAG}:latest
+	docker push ${DOCKER_TAG}:${VERSION}
+	docker push ${DOCKER_TAG}:latest
 
 .PHONY: FORCE
 FORCE:

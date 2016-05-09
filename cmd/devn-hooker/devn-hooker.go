@@ -63,7 +63,7 @@ func loadSecret() ([]byte, error) {
 		if i != 256 {
 			return nil, fmt.Errorf("only got %d/256 bytes of random", i)
 		}
-		err = ioutil.WriteFile(flags.secret, b, 0500)
+		err = ioutil.WriteFile(flags.secret, b, 0600)
 		if err != nil {
 			return nil, err
 		}
@@ -153,8 +153,6 @@ func serve(rw http.ResponseWriter, req *http.Request) {
 		http.NotFound(rw, req)
 		return
 	}
-	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte("OK\n"))
 
 	fmt.Printf("From %s, running %s\n", req.RemoteAddr, script)
 
@@ -164,6 +162,25 @@ func serve(rw http.ResponseWriter, req *http.Request) {
 	} else {
 		cmd = exec.Command(script)
 	}
-	cmd.Start()
-	cmd.Process.Release()
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		rw.WriteHeader(500)
+		fmt.Fprintf(os.Stderr, "Connecting stderr: %s\n", err.Error())
+		rw.Write([]byte(err.Error() + "\n"))
+		return
+	}
+	go io.Copy(rw, stderr)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Connecting stdout: %s\n", err.Error())
+		rw.Write([]byte(err.Error() + "\n"))
+		return
+	}
+	go io.Copy(rw, stdout)
+	rw.WriteHeader(http.StatusOK)
+	err = cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Run Error: %s\n", err.Error())
+	}
 }

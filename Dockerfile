@@ -10,3 +10,7 @@ RUN apt-get update \
 		git
 
 ADD bin/* /usr/bin/
+
+RUN mkdir /devn
+VOLUME /devn/builds
+WORKDIR /devn

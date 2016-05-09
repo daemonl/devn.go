@@ -177,7 +177,7 @@ func do() error {
 	}
 
 	lines := strings.Split(buff.String(), "\n")
-	baseEnv := []string{}
+	baseEnv := os.Environ()
 	after := false
 	for _, l := range lines {
 		if l == delim {
